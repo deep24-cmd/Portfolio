@@ -151,14 +151,37 @@ contactForm.addEventListener('submit', (e) => {
         message: document.getElementById('message').value
     };
 
-    // Show success message
-    showNotification('Thank you for your message! I\'ll get back to you soon. 🚀', 'success');
-
-    // Reset form
-    contactForm.reset();
-
-    // In a real application, you would send this data to a server
-    console.log('Form submitted:', formData);
+    // Send data to Formspree
+    // IMPORTANT: Replace 'YOUR_FORMSPREE_ID' with your actual Formspree Form ID from https://formspree.io/
+    fetch('https://formspree.io/f/xkowdewa', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+        .then(response => {
+            if (response.ok) {
+                // Show success message
+                showNotification('Thank you for your message! I\'ll get back to you soon. 🚀', 'success');
+                // Reset form
+                contactForm.reset();
+            } else {
+                // Handle server errors
+                response.json().then(data => {
+                    if (Object.hasOwn(data, 'errors')) {
+                        showNotification(data.errors.map(error => error.message).join(", "), 'error');
+                    } else {
+                        showNotification('Oops! There was a problem submitting your form', 'error');
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            // Handle network errors
+            showNotification('Oops! There was a problem submitting your form', 'error');
+            console.error('Error:', error);
+        });
 });
 
 // ===================================
